@@ -5,9 +5,9 @@ import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileStorageService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
-import com.udacity.jwdnd.course1.cloudstorage.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -26,17 +26,14 @@ import java.util.Map;
 @RequestMapping("/home")
 public class HomeController {
     private Logger logger = LoggerFactory.getLogger(HomeController.class);
-    private final UserService userService;
-    private final NoteService noteService;
-    private final CredentialService credentialService;
-    private final FileStorageService fileStorageService;
-
-    public HomeController(UserService userService, NoteService noteService, CredentialService credentialService, FileStorageService fileStorageService) {
-        this.userService = userService;
-        this.noteService = noteService;
-        this.credentialService = credentialService;
-        this.fileStorageService = fileStorageService;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private NoteService noteService;
+    @Autowired
+    private CredentialService credentialService;
+    @Autowired
+    private FileStorageService fileStorageService;
 
 
     @GetMapping()
@@ -97,11 +94,11 @@ public class HomeController {
         String username = authentication.getName();
         User user = userService.getUser(username);
         credentialForm.setUserId(user.getUserId());
-
-        int savedRows = credentialService.saveCredential(credentialForm);
-        if (savedRows == -1) creationError = "There was an error updating your Credential. Please try again.";
-        else if (savedRows < 0) creationError = "There was an error adding your Credential. Please try again.";
-
+        try {
+            credentialService.saveCredential(credentialForm);
+        } catch (Exception ex) {
+            creationError = ex.getLocalizedMessage();
+        }
         if (creationError == null) {
             model.addAttribute("success", true);
         } else {
@@ -135,7 +132,7 @@ public class HomeController {
     }
 
     @PostMapping("/file")
-    public String uploadFile(Authentication authentication, @RequestParam("fileUpload") MultipartFile fileUpload, Model model){
+    public String uploadFile(Authentication authentication, @RequestParam("fileUpload") MultipartFile fileUpload, Model model) {
         logger.info("request to save file for user {}", authentication.getName());
         String username = authentication.getName();
         User user = userService.getUser(username);
@@ -148,14 +145,6 @@ public class HomeController {
             return "result";
         }
 
-//        logger.info("File size{}", fileUpload.getSize());
-//
-//        if (fileUpload.getSize() > Constants.MAX_FILE_SIZE) {
-//            logger.info("File is too large");
-//            String message = "File is too large, please select a smaller file";
-//            model.addAttribute("failed", message);
-//            return "result";
-//        }
 
         String message = fileStorageService.saveFile(user.getUserId(), fileUpload);
         if (message == null) {

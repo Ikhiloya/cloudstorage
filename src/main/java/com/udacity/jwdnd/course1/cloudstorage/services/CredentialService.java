@@ -25,43 +25,48 @@ public class CredentialService {
     }
 
 
-    public int saveCredential(CredentialForm credentialForm) {
+    public void saveCredential(CredentialForm credentialForm) throws Exception {
         if (credentialForm.getCredentialId() == null) {
             logger.info("creating a new credential");
             //new note
-            return addCredential(credentialForm);
+            addCredential(credentialForm);
         } else {
             logger.info("updating an existing credential");
             //existing note
-            return updateCredential(credentialForm);
+            updateCredential(credentialForm);
         }
     }
 
-    public int addCredential(CredentialForm credentialForm) {
+    public void addCredential(CredentialForm credentialForm) throws Exception {
         String encodedKey = encryptionService.generateEncodedKey();
-        return credentialMapper.insert(
-                new Credential(
-                        credentialForm.getUrl(),
-                        credentialForm.getUsername(),
-                        encodedKey,
-                        encryptionService.encryptValue(credentialForm.getPassword(), encodedKey),
-                        credentialForm.getUserId()
-                )
-        );
+        try {
+            credentialMapper.insert(
+                    new Credential(
+                            credentialForm.getUrl(),
+                            credentialForm.getUsername(),
+                            encodedKey,
+                            encryptionService.encryptValue(credentialForm.getPassword(), encodedKey),
+                            credentialForm.getUserId()
+                    )
+            );
+        } catch (Exception ex) {
+            throw new Exception("There was an error adding your Credential. Please try again.");
+        }
+
     }
 
 
-    public int updateCredential(CredentialForm credentialForm) {
+    public void updateCredential(CredentialForm credentialForm) throws Exception {
         String encodedKey = encryptionService.generateEncodedKey();
         Credential credential = credentialMapper.getCredential((credentialForm.getCredentialId()));
-        return Optional.ofNullable(credential).map(currentCredential -> {
+        Optional.ofNullable(credential).map(currentCredential -> {
             currentCredential.setUrl(credentialForm.getUrl());
             currentCredential.setUsername(credentialForm.getUsername());
             currentCredential.setKey(encodedKey);
             currentCredential.setPassword(encryptionService.encryptValue(credentialForm.getPassword(), encodedKey));
             return credentialMapper.update(credential);
 
-        }).orElse(-1);
+        }).orElseThrow(() -> new Exception("There was an error updating your Credential. Please try again"));
     }
 
 
