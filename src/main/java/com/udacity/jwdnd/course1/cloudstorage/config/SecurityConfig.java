@@ -30,7 +30,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf()
                 .disable()
-                .cors();
+                .cors()
+                .and()
+                .exceptionHandling().accessDeniedPage("/error");
 
         http.formLogin()
                 .loginPage("/login")

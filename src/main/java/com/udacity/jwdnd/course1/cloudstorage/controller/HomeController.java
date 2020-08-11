@@ -5,6 +5,7 @@ import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileStorageService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import com.udacity.jwdnd.course1.cloudstorage.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -52,7 +53,6 @@ public class HomeController {
         return "home";
     }
 
-    //TODO: validate the length of note title and restrict in front end
     @PostMapping("/note")
     public String saveNote(Authentication authentication, @ModelAttribute("noteForm") NoteForm noteForm, Model model) {
         logger.info("request to save note for user {}", authentication.getName());
@@ -134,9 +134,8 @@ public class HomeController {
         return credentialService.decryptCredential(data);
     }
 
-    // TODO: The application should not allow duplicate usernames or duplicate filenames attributed to a single user.
     @PostMapping("/file")
-    public String uploadFile(Authentication authentication, @RequestParam("fileUpload") MultipartFile fileUpload, Model model) {
+    public String uploadFile(Authentication authentication, @RequestParam("fileUpload") MultipartFile fileUpload, Model model){
         logger.info("request to save file for user {}", authentication.getName());
         String username = authentication.getName();
         User user = userService.getUser(username);
@@ -148,6 +147,15 @@ public class HomeController {
             model.addAttribute("failed", message);
             return "result";
         }
+
+//        logger.info("File size{}", fileUpload.getSize());
+//
+//        if (fileUpload.getSize() > Constants.MAX_FILE_SIZE) {
+//            logger.info("File is too large");
+//            String message = "File is too large, please select a smaller file";
+//            model.addAttribute("failed", message);
+//            return "result";
+//        }
 
         String message = fileStorageService.saveFile(user.getUserId(), fileUpload);
         if (message == null) {

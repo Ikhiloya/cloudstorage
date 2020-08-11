@@ -33,7 +33,7 @@ public class SignUpPage {
     }
 
 
-    public void goToLogin(){
+    public void goToLogin() {
         loginLink.click();
     }
 

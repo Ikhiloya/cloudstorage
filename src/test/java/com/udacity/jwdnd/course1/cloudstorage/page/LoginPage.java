@@ -30,13 +30,13 @@ public class LoginPage {
                 .until(ExpectedConditions.visibilityOf(element));
     }
 
-    public void login(String username, String password){
+    public void login(String username, String password) {
         usernameField.sendKeys(username);
         passwordField.sendKeys(password);
         submitButton.click();
     }
 
-    public void goToSignUp(){
+    public void goToSignUp() {
         waitForVisibility(signUpLink);
         signUpLink.click();
     }

@@ -25,7 +25,6 @@ public class CredentialService {
     }
 
 
-
     public int saveCredential(CredentialForm credentialForm) {
         if (credentialForm.getCredentialId() == null) {
             logger.info("creating a new credential");

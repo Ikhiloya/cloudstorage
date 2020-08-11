@@ -4,10 +4,12 @@ import com.udacity.jwdnd.course1.cloudstorage.mapper.FileMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.FileDTO;
 import com.udacity.jwdnd.course1.cloudstorage.model.FileForm;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -36,7 +38,6 @@ public class FileStorageService {
 
         // Check if the file's name contains invalid characters
         if (fileName.contains("..")) {
-//                return -1; //Filename contains invalid path sequence
             message = "There was an error saving your File, file name contains invalid characters. Please try again.";
             return message;
         }
@@ -45,7 +46,7 @@ public class FileStorageService {
             File dbFile = new File(fileName, file.getContentType(), userId, file.getBytes());
             fileMapper.insert(dbFile);
         } catch (Exception ex) {
-//            return -2; // could not store the file, Exception occurred
+
             message = "There was an error saving your file. Please try again.";
         }
         return message;
