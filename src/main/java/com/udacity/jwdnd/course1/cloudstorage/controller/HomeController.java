@@ -59,9 +59,11 @@ public class HomeController {
         User user = userService.getUser(username);
         noteForm.setUserId(user.getUserId());
 
-        int savedRows = noteService.saveNote(noteForm);
-        if (savedRows == -1) creationError = "There was an error updating your Note. Please try again.";
-        else if (savedRows < 0) creationError = "There was an error adding your Note. Please try again.";
+        try {
+            noteService.saveNote(noteForm);
+        } catch (Exception ex) {
+            creationError = ex.getLocalizedMessage();
+        }
 
         if (creationError == null) {
             model.addAttribute("success", true);
@@ -126,7 +128,7 @@ public class HomeController {
 
     @RequestMapping(value = "/decrypt-credential", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Map<String, String> saveCredential(@RequestBody EncryptionData data) {
+    public Map<String, String> decryptCredential(@RequestBody EncryptionData data) {
         logger.info("request to decrypt credentialDTO for user ");
         return credentialService.decryptCredential(data);
     }

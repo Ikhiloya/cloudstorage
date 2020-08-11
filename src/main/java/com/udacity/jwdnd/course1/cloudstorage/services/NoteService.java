@@ -19,36 +19,40 @@ public class NoteService {
         this.noteMapper = noteMapper;
     }
 
-    public int saveNote(NoteForm noteForm) {
+    public void saveNote(NoteForm noteForm) throws Exception {
         if (noteForm.getNoteId() == null) {
             logger.info("creating a new note");
             //new note
-            return addNote(noteForm);
+            addNote(noteForm);
         } else {
             logger.info("updating an existing note");
             //existing note
-            return updateNote(noteForm);
+            updateNote(noteForm);
         }
     }
 
-    public int addNote(NoteForm noteForm) {
-        return noteMapper.insert(
-                new Note(
-                        noteForm.getNoteTitle(),
-                        noteForm.getNoteDescription(),
-                        noteForm.getUserId()
-                )
-        );
+    public void addNote(NoteForm noteForm) throws Exception {
+        try {
+            noteMapper.insert(
+                    new Note(
+                            noteForm.getNoteTitle(),
+                            noteForm.getNoteDescription(),
+                            noteForm.getUserId()
+                    )
+            );
+        } catch (Exception ex) {
+            throw new Exception("There was an error adding your Note. Please try again.");
+        }
     }
 
-    public int updateNote(NoteForm noteForm) {
+    public void updateNote(NoteForm noteForm) throws Exception {
         Note note = noteMapper.getNote(noteForm.getNoteId());
-        return Optional.ofNullable(note).map(currentNote -> {
+        Optional.ofNullable(note).map(currentNote -> {
             currentNote.setNoteTitle(noteForm.getNoteTitle());
             currentNote.setNoteDescription(noteForm.getNoteDescription());
             return noteMapper.update(note);
 
-        }).orElse(-1);
+        }).orElseThrow(() -> new Exception("There was an error updating your Note. Please try again."));
     }
 
 
