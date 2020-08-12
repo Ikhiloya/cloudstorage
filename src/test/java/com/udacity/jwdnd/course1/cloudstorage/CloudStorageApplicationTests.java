@@ -54,6 +54,15 @@ class CloudStorageApplicationTests {
 
 
     @Test
+    public void testInvalidUrlRedirectsToErrorPage() {
+        signUpAndLogin();
+        //navigate to invalid url
+        driver.get(baseURL + "/home/jfjdjd");
+        Assertions.assertEquals("Error", driver.getTitle());
+    }
+
+
+    @Test
     public void testUnauthorizedUserCanOnlyAccessLoginAndSignUpPage() {
         //navigate to home page and verify that unauthorized user has no access
         driver.get(baseURL + "/home");
